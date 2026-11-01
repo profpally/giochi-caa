@@ -73,5 +73,7 @@ const CONFIG = {
 /* ======================== FINE CONFIG ======================== */
 </script>
 <script src="motore-v1.js"></script>
+<script>/* se il file è aperto da solo (es. dalla cartella Download), carica il motore da internet */
+if (!window.GiochiCAA) document.write('<script src="https://cdn.jsdelivr.net/gh/profpally/giochi-caa@main/motore-v1.js"><\/script>');</script>
 </body>
 </html>
