@@ -230,6 +230,19 @@ const SC = (C.tipo || 'storia') !== 'storia' ? null : (typeof C.scena === 'strin
 const zonesList = () => C.tipo === 'smista' ? (C.scatole || []) : C.tipo === 'tabellone' ? (C.caselle || []) : SC ? (SC.zone || []) : [];
 if (!['tabella','mimo'].includes(C.tipo)){
   const ids = zonesList().map(z => z.id), low = t => (t || '').toLowerCase();
+  const ALIAS = {sopra:['banco','sul banco','sopra il banco','tavolo','banchi'], sotto:['sotto il banco','pavimento','per terra'], cattedra:['scrivania','tavolo della maestra','tavolo del maestro'], cestino:['pattumiera','spazzatura','secchio'], lavagna:['lim','lavagna interattiva'],
+    spiaggia:['sabbia','riva','lido'], mare:['acqua','oceano','mari'], cielo:['aria','in alto'], prato:['erba'], bosco:['alberi','foresta','pineta'], lago:['laghetto'], montagna:['monti','montagne','vetta'],
+    strada:['via','corsia'], parco:['giardini','giardino pubblico'], palazzo:['edificio','casa','palazzi','condominio'], campo:['orto','campi','terreno'], fattoria:['stalla','fienile','cascina'], fiume:['torrente','ruscello'],
+    camera:['camera da letto','cameretta','letto','stanza da letto'], soggiorno:['salotto','divano','sala'], cucina:['cucine'], bagno:['bagni'], giardino:['cortile'],
+    nord:['settentrione','italia settentrionale','nord italia'], sud:['meridione','italia meridionale','sud italia','isole','sud e isole','sicilia','sardegna'], centro:['italia centrale','centro italia'],
+    strisce:['strisce pedonali','attraversamento','passaggio pedonale'], marciapiede:['marciapiedi'], semaforo:['semafori'], destra:['a destra'], sinistra:['a sinistra'], alto:['in alto','sopra il piatto']};
+  const trova = z => { const k = low(String(z || '')).trim(); if (ids.includes(z)) return z; const byId = ids.find(i => low(i) === k); if (byId) return byId;
+    const byWord = zonesList().find(x => low(x.parola) === k || low(x.dici) === k); if (byWord) return byWord.id;
+    return ids.find(i => (ALIAS[i] || []).includes(k)) || null; };
+  C.passi.forEach(p => { const t = trova(p.zona); if (t) p.zona = t; });
+  C.passi.forEach(p => { p.distrattori = (p.distrattori || []).map(d => typeof d === 'string' ? {oggetto: d, emoji: ((C.passi.find(q => q.oggetto === d) || {}).emoji) || '❔'} : d).filter(d => d && d.oggetto); });
+  const doppi = {}; C.passi.forEach(p => { (doppi[p.oggetto] = doppi[p.oggetto] || new Set()).add(p.zona); });
+  Object.entries(doppi).forEach(([o, zs]) => { if (zs.size > 1 && C.tipo !== 'sequenza') CHECKS.push(`«${o}» va in posti diversi (${[...zs].join(', ')}): in un'attività ogni oggetto deve avere un solo posto giusto.`); });
   const bad = C.passi.filter(p => !ids.includes(p.zona));
   bad.forEach(p => CHECKS.push(`«${p.oggetto}»: il posto «${p.zona}» non esiste in questa scena (posti possibili: ${ids.join(', ')}). Il passo è stato tolto.`));
   C.passi = C.passi.filter(p => ids.includes(p.zona));
