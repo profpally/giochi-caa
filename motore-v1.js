@@ -105,6 +105,22 @@ function stampa(titolo, list, obiettivi){
 const ICONE = {mare:'🏖️', aula:'🏫', montagna:'🏔️', citta:'🏙️', campagna:'🌾', casa:'🏠', italia:'🗺️', tavola:'🍽️', incrocio:'🚦'};
 const icona = a => a.icona || ((a.tipo === 'sequenza' || a._seq) ? '➡️' : (a.passi || []).some(p => +p.quantita > 1) ? '🧮' : a.tipo === 'smista' ? ((a.scatole || []).length === 1 ? '❓' : '🧺') : a.tipo === 'tabellone' ? '🔢' : a.tipo === 'tabella' ? '💬' : a.tipo === 'mimo' ? '🎭' : (ICONE[a.scena] || '📖'));
 const FATTE = {};
+/* accetta l'elenco delle attività anche con altri nomi o in forme diverse */
+function normalizza(C){
+  if (!C || typeof C !== 'object') return C;
+  if (Array.isArray(C)) return {titolo: 'Set di attività', set: C};
+  const sembra = a => a && typeof a === 'object' && !Array.isArray(a) && (a.tipo || a.passi || a.voci || a.carte || a.caselle || a.scatole || a.scena);
+  if (!C.set || !Array.isArray(C.set) || !C.set.length){
+    for (const k of ['attivita', 'attività', 'activities', 'giochi', 'attivitaSet', 'elenco', 'lista']){ if (Array.isArray(C[k]) && C[k].some(sembra)){ C.set = C[k]; break; } }
+    if ((!C.set || !C.set.length) && !(C.passi && C.passi.length) && !C.voci && !C.carte){
+      const k = Object.keys(C).find(k => Array.isArray(C[k]) && C[k].length && C[k].every(sembra)); if (k) C.set = C[k];
+    }
+  }
+  if (C.set && !Array.isArray(C.set) && typeof C.set === 'object') C.set = Object.values(C.set).filter(sembra);
+  if (Array.isArray(C.set) && C.set.length === 1 && !OPT_SINGLE_MENU) { const one = Object.assign({}, C, C.set[0]); delete one.set; return one; }
+  return C;
+}
+const OPT_SINGLE_MENU = false;
 function menu(B){
   RUNS++; try { window.speechSynthesis && speechSynthesis.cancel(); } catch(e) {}
   stile();
@@ -128,6 +144,7 @@ function menu(B){
 
 function avvia(CONFIG, OPT){
 OPT = OPT || {};
+CONFIG = normalizza(CONFIG);
 if (CONFIG.set && !OPT.collect) return menu(CONFIG);
 const RUN = OPT.collect ? RUNS : ++RUNS;
 stile();
