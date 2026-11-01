@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La frutta – set di attività per più discipline</title>
+</head>
+<body>
+<script>
+/* ======================= INIZIO CONFIG ======================= */
+const CONFIG = {
+  id: "esempio-frutta",
+  titolo: "La frutta: scienze, matematica, inglese, spagnolo",
+  protagonista: "Leo",
+  livello: 1,
+  riscaldamento: 2,
+  voce: true, velocitaVoce: 0.9, tipoVoce: "automatica",
+  obiettivi: [
+    "Ordina 5 immagini del ciclo della pianta nella sequenza corretta, con il posto illuminato.",
+    "Mette nel contenitore 1, 2 o 3 oggetti su richiesta verbale, con la voce che conta.",
+    "Ascolta una parola in inglese e colloca il simbolo corrispondente sulla cartella della tombola.",
+    "Compone con la tabella parlante una frase di 2 simboli in spagnolo."
+  ],
+  set: [
+    { titolo: "Dal seme al frutto", tipo: "sequenza", riscaldamento: 1,
+      introduzione: "Guardiamo come cresce una pianta.", fine: "Ecco il frutto! Bravo {nome}!",
+      passi: [
+        { oggetto: "seme", emoji: "🌰", frase: "Prima metto il seme nella terra.", comando: "Metti il seme per primo." },
+        { oggetto: "acqua", emoji: "💧", frase: "Poi do l'acqua.", comando: "Metti l'acqua dopo il seme." },
+        { oggetto: "germoglio", emoji: "🌱", frase: "Dalla terra esce il germoglio.", comando: "Metti il germoglio." },
+        { oggetto: "fiore", emoji: "🌸", frase: "Sulla pianta nasce il fiore.", comando: "Metti il fiore." },
+        { oggetto: "mela", emoji: "🍎", frase: "Alla fine c'è il frutto.", comando: "Metti la mela per ultima." }
+      ] },
+    { titolo: "Contiamo la frutta", tipo: "smista", riscaldamento: 1,
+      scatole: [ { id: "cesto", parola: "cesto", emoji: "🧺" }, { id: "piatto", parola: "piatto", emoji: "🍽️" } ],
+      introduzione: "Prepariamo la merenda.", fine: "La merenda è pronta!",
+      passi: [
+        { oggetto: "mela", emoji: "🍎", zona: "cesto", quantita: 1, frase: "La mela è rossa.", comando: "Metti una mela nel cesto." },
+        { oggetto: "banana", emoji: "🍌", zona: "piatto", quantita: 2, frase: "Le banane sono gialle.", comando: "Metti due banane nel piatto." },
+        { oggetto: "pera", emoji: "🍐", zona: "cesto", quantita: 3, frase: "Le pere sono verdi.", comando: "Metti tre pere nel cesto." },
+        { oggetto: "arancia", emoji: "🍊", zona: "piatto", quantita: 2, frase: "Le arance sono rotonde.", comando: "Metti due arance nel piatto." }
+      ] },
+    { titolo: "Fruit bingo (English)", tipo: "tabellone", lingua: "en", carteMostrano: "simbolo",
+      caselle: [
+        { id: "mela", parola: "mela", dici: "apple", emoji: "🍎" }, { id: "banana", parola: "banana", dici: "banana", emoji: "🍌" },
+        { id: "pera", parola: "pera", dici: "pear", emoji: "🍐" }, { id: "arancia", parola: "arancia", dici: "orange", emoji: "🍊" },
+        { id: "fragola", parola: "fragola", dici: "strawberry", emoji: "🍓" }, { id: "uva", parola: "uva", dici: "grapes", emoji: "🍇" },
+        { id: "limone", parola: "limone", dici: "lemon", emoji: "🍋" }, { id: "anguria", parola: "anguria", dici: "watermelon", emoji: "🍉" }
+      ],
+      introduzione: "Let's play bingo.", fine: "Bingo! Well done!",
+      passi: [
+        { oggetto: "pera", dici: "pear", emoji: "🍐", zona: "pera", frase: "Here is the pear.", comando: "Put the pear on the card.", domanda: "Where is the pear?" },
+        { oggetto: "uva", dici: "grapes", emoji: "🍇", zona: "uva", frase: "Here are the grapes.", comando: "Put the grapes on the card.", domanda: "Where are the grapes?" },
+        { oggetto: "mela", dici: "apple", emoji: "🍎", zona: "mela", frase: "Here is the apple.", comando: "Put the apple on the card.", domanda: "Where is the apple?" },
+        { oggetto: "limone", dici: "lemon", emoji: "🍋", zona: "limone", frase: "Here is the lemon.", comando: "Put the lemon on the card.", domanda: "Where is the lemon?" },
+        { oggetto: "banana", dici: "banana", emoji: "🍌", zona: "banana", frase: "Here is the banana.", comando: "Put the banana on the card.", domanda: "Where is the banana?" },
+        { oggetto: "anguria", dici: "watermelon", emoji: "🍉", zona: "anguria", frase: "Here is the watermelon.", comando: "Put the watermelon on the card.", domanda: "Where is the watermelon?" },
+        { oggetto: "arancia", dici: "orange", emoji: "🍊", zona: "arancia", frase: "Here is the orange.", comando: "Put the orange on the card.", domanda: "Where is the orange?" },
+        { oggetto: "fragola", dici: "strawberry", emoji: "🍓", zona: "fragola", frase: "Here is the strawberry.", comando: "Put the strawberry on the card.", domanda: "Where is the strawberry?" }
+      ] },
+    { titolo: "La fruta (español)", tipo: "tabella", lingua: "es",
+      voci: [
+        { parola: "io", dici: "yo", emoji: "🙋", categoria: "persone" }, { parola: "tu", dici: "tú", emoji: "👉", categoria: "persone" },
+        { parola: "volere", dici: "quiero", emoji: "🤲", categoria: "azioni" }, { parola: "mangiare", dici: "comer", emoji: "🍽️", categoria: "azioni" },
+        { parola: "mela", dici: "manzana", emoji: "🍎", categoria: "cose" }, { parola: "banana", dici: "plátano", emoji: "🍌", categoria: "cose" },
+        { parola: "pera", dici: "pera", emoji: "🍐", categoria: "cose" }, { parola: "arancia", dici: "naranja", emoji: "🍊", categoria: "cose" },
+        { parola: "fragola", dici: "fresa", emoji: "🍓", categoria: "cose" }, { parola: "uva", dici: "uvas", emoji: "🍇", categoria: "cose" },
+        { parola: "buono", dici: "rico", emoji: "😋", categoria: "descrizioni" }, { parola: "sì", dici: "sí", emoji: "👍", categoria: "sociali" },
+        { parola: "no", dici: "no", emoji: "👎", categoria: "sociali" }, { parola: "ancora", dici: "más", emoji: "🔁", categoria: "sociali" }
+      ] }
+  ]
+};
+/* ======================== FINE CONFIG ======================== */
+</script>
+<script src="motore-v1.js"></script>
+</body>
+</html>

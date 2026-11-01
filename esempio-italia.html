@@ -1,36 +1,87 @@
 <!DOCTYPE html>
-<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>L'Italia: Nord, Centro, Sud</title></head>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L'Italia: Nord, Centro, Sud – set di attività</title>
+</head>
 <body>
 <script>
+/* ======================= INIZIO CONFIG ======================= */
 const CONFIG = {
   id: "esempio-italia",
   titolo: "L'Italia: Nord, Centro, Sud",
-  tipo: "storia",
   protagonista: "Leo",
   livello: 1,
   riscaldamento: 2,
   voce: true, velocitaVoce: 0.9, tipoVoce: "automatica",
-  scena: "italia",
-  introduzione: "{nome} guarda la cartina dell'Italia. Mettiamo ogni cosa al suo posto.",
-  fine: "La cartina è completa. Bravo {nome}!",
   obiettivi: [
     "Colloca un elemento nella zona indicata della cartina (Nord, Centro, Sud, mare).",
-    "Al livello 3, colloca l'elemento rispondendo alla domanda «dove?», senza indicazione verbale del posto.",
-    "Mantiene l'attenzione per 8 passi consecutivi con l'adulto accanto."
+    "Al livello 3 colloca l'elemento rispondendo alla domanda «dove?», senza che l'adulto nomini il posto.",
+    "Riconosce lo stesso simbolo in attività diverse (cartina, contenitori, tombola).",
+    "Usa la tabella per comporre una frase di 2-3 simboli sull'attività svolta."
   ],
-  passi: [
-    { oggetto: "Alpi", emoji: "🏔️", zona: "nord", frase: "Le Alpi sono montagne altissime, con la neve.", comando: "Metti le Alpi al Nord.", domanda: "Dove sono le Alpi?" },
-    { oggetto: "nave", emoji: "🚢", zona: "mare", frase: "Una grande nave porta le persone e le merci.", comando: "Metti la nave nel mare.", domanda: "Dove naviga la nave?" },
-    { oggetto: "Colosseo", emoji: "🏛️", zona: "centro", frase: "Il Colosseo è a Roma, la capitale d'Italia.", comando: "Metti il Colosseo al Centro.", domanda: "Dove si trova il Colosseo?" },
-    { oggetto: "vulcano", emoji: "🌋", zona: "sud", frase: "L'Etna è un vulcano: a volte esce il fuoco.", comando: "Metti il vulcano al Sud.", domanda: "Dove si trova il vulcano Etna?" },
-    { oggetto: "fiume", emoji: "🏞️", zona: "nord", frase: "Il Po è il fiume più lungo d'Italia.", comando: "Metti il fiume al Nord.", domanda: "Dove scorre il Po?" },
-    { oggetto: "pesce", emoji: "🐟", zona: "mare", frase: "Il pesce nuota nell'acqua salata.", comando: "Metti il pesce nel mare.", domanda: "Dove nuota il pesce?" },
-    { oggetto: "collina", emoji: "⛰️", zona: "centro", frase: "In Toscana ci sono tante colline verdi.", comando: "Metti la collina al Centro.", domanda: "Dove sono le colline della Toscana?" },
-    { oggetto: "trullo", emoji: "🏠", zona: "sud", frase: "Il trullo è una casa con il tetto a cono.", comando: "Metti il trullo al Sud.", domanda: "Dove si trovano i trulli?" },
-    { oggetto: "lago", emoji: "💧", zona: "nord", frase: "Il lago di Garda è il lago più grande d'Italia.", comando: "Metti il lago al Nord.", domanda: "Dove si trova il lago di Garda?" },
-    { oggetto: "limone", emoji: "🍋", zona: "sud", frase: "In Sicilia e in Campania crescono i limoni.", comando: "Metti il limone al Sud.", domanda: "Dove crescono i limoni?" }
+  set: [
+    { titolo: "La cartina dell'Italia", tipo: "storia", scena: "italia",
+      introduzione: "{nome} guarda la cartina dell'Italia.", fine: "La cartina è completa. Bravo {nome}!",
+      passi: [
+        { oggetto: "Alpi", emoji: "🏔️", zona: "nord", frase: "Le Alpi sono montagne altissime, con la neve.", comando: "Metti le Alpi al Nord.", domanda: "Dove sono le Alpi?" },
+        { oggetto: "nave", emoji: "🚢", zona: "mare", frase: "Una grande nave porta le persone e le merci.", comando: "Metti la nave nel mare.", domanda: "Dove naviga la nave?" },
+        { oggetto: "Colosseo", emoji: "🏛️", zona: "centro", frase: "Il Colosseo è a Roma, la capitale d'Italia.", comando: "Metti il Colosseo al Centro.", domanda: "Dove si trova il Colosseo?" },
+        { oggetto: "vulcano", emoji: "🌋", zona: "sud", frase: "L'Etna è un vulcano: a volte esce il fuoco.", comando: "Metti il vulcano al Sud.", domanda: "Dove si trova il vulcano Etna?" },
+        { oggetto: "fiume", emoji: "🏞️", zona: "nord", frase: "Il Po è il fiume più lungo d'Italia.", comando: "Metti il fiume al Nord.", domanda: "Dove scorre il Po?" },
+        { oggetto: "pesce", emoji: "🐟", zona: "mare", frase: "Il pesce nuota nell'acqua salata.", comando: "Metti il pesce nel mare.", domanda: "Dove nuota il pesce?" },
+        { oggetto: "collina", emoji: "⛰️", zona: "centro", frase: "In Toscana ci sono tante colline verdi.", comando: "Metti la collina al Centro.", domanda: "Dove sono le colline della Toscana?" },
+        { oggetto: "trullo", emoji: "🏠", zona: "sud", frase: "Il trullo è una casa con il tetto a cono.", comando: "Metti il trullo al Sud.", domanda: "Dove si trovano i trulli?" }
+      ] },
+    { titolo: "Nord, Centro o Sud?", tipo: "smista",
+      scatole: [
+        { id: "nord", ambiente: "nord", parola: "Nord", emoji: "⬆️" },
+        { id: "centro", ambiente: "centro", parola: "Centro", emoji: "⏺️" },
+        { id: "sud", ambiente: "sud", parola: "Sud", emoji: "⬇️" }
+      ],
+      introduzione: "Mettiamo ogni cosa nella sua parte d'Italia.", fine: "Tutto in ordine. Bravo {nome}!",
+      passi: [
+        { oggetto: "Alpi", emoji: "🏔️", zona: "nord", frase: "Le Alpi hanno la neve anche d'estate.", comando: "Metti le Alpi al Nord.", domanda: "Dove sono le Alpi?" },
+        { oggetto: "Colosseo", emoji: "🏛️", zona: "centro", frase: "Il Colosseo è un monumento antico.", comando: "Metti il Colosseo al Centro.", domanda: "Dove si trova il Colosseo?" },
+        { oggetto: "vulcano", emoji: "🌋", zona: "sud", frase: "Dal vulcano esce il fumo.", comando: "Metti il vulcano al Sud.", domanda: "Dove si trova l'Etna?" },
+        { oggetto: "lago", emoji: "💧", zona: "nord", frase: "Il lago di Garda è grande e calmo.", comando: "Metti il lago al Nord.", domanda: "Dove si trova il lago di Garda?" },
+        { oggetto: "collina", emoji: "⛰️", zona: "centro", frase: "Sulle colline della Toscana crescono le viti.", comando: "Metti la collina al Centro.", domanda: "Dove sono le colline della Toscana?" },
+        { oggetto: "trullo", emoji: "🏠", zona: "sud", frase: "I trulli sono case bianche e rotonde.", comando: "Metti il trullo al Sud.", domanda: "Dove si trovano i trulli?" },
+        { oggetto: "fiume", emoji: "🏞️", zona: "nord", frase: "Il Po attraversa la pianura.", comando: "Metti il fiume al Nord.", domanda: "Dove scorre il Po?" },
+        { oggetto: "limone", emoji: "🍋", zona: "sud", frase: "I limoni sono gialli e profumati.", comando: "Metti il limone al Sud.", domanda: "Dove crescono i limoni?" }
+      ] },
+    { titolo: "Tombola dell'Italia", tipo: "tabellone", carteMostrano: "simbolo", paroleSulTabellone: false,
+      introduzione: "Giochiamo a tombola.", fine: "Tombola! Bravo {nome}!",
+      caselle: [
+        { id: "Alpi", parola: "Alpi", emoji: "🏔️" }, { id: "nave", parola: "nave", emoji: "🚢" },
+        { id: "Colosseo", parola: "Colosseo", emoji: "🏛️" }, { id: "vulcano", parola: "vulcano", emoji: "🌋" },
+        { id: "fiume", parola: "fiume", emoji: "🏞️" }, { id: "pesce", parola: "pesce", emoji: "🐟" },
+        { id: "trullo", parola: "trullo", emoji: "🏠" }, { id: "limone", parola: "limone", emoji: "🍋" }
+      ],
+      passi: [
+        { oggetto: "Colosseo", emoji: "🏛️", zona: "Colosseo", frase: "È uscito il Colosseo.", comando: "Metti il Colosseo sulla cartella.", domanda: "Dov'è il Colosseo sulla cartella?" },
+        { oggetto: "pesce", emoji: "🐟", zona: "pesce", frase: "È uscito il pesce.", comando: "Metti il pesce sulla cartella.", domanda: "Dov'è il pesce sulla cartella?" },
+        { oggetto: "Alpi", emoji: "🏔️", zona: "Alpi", frase: "Sono uscite le Alpi.", comando: "Metti le Alpi sulla cartella.", domanda: "Dove sono le Alpi sulla cartella?" },
+        { oggetto: "limone", emoji: "🍋", zona: "limone", frase: "È uscito il limone.", comando: "Metti il limone sulla cartella.", domanda: "Dov'è il limone sulla cartella?" },
+        { oggetto: "nave", emoji: "🚢", zona: "nave", frase: "È uscita la nave.", comando: "Metti la nave sulla cartella.", domanda: "Dov'è la nave sulla cartella?" },
+        { oggetto: "vulcano", emoji: "🌋", zona: "vulcano", frase: "È uscito il vulcano.", comando: "Metti il vulcano sulla cartella.", domanda: "Dov'è il vulcano sulla cartella?" },
+        { oggetto: "trullo", emoji: "🏠", zona: "trullo", frase: "È uscito il trullo.", comando: "Metti il trullo sulla cartella.", domanda: "Dov'è il trullo sulla cartella?" },
+        { oggetto: "fiume", emoji: "🏞️", zona: "fiume", frase: "È uscito il fiume.", comando: "Metti il fiume sulla cartella.", domanda: "Dov'è il fiume sulla cartella?" }
+      ] },
+    { titolo: "Parliamo dell'Italia", tipo: "tabella",
+      voci: [
+        { parola: "io", emoji: "🙋", categoria: "persone" }, { parola: "tu", emoji: "👉", categoria: "persone" },
+        { parola: "guardare", emoji: "👀", categoria: "azioni" }, { parola: "mettere", emoji: "🤲", categoria: "azioni" }, { parola: "andare", emoji: "🚶", categoria: "azioni" },
+        { parola: "Alpi", emoji: "🏔️", categoria: "cose" }, { parola: "nave", emoji: "🚢", categoria: "cose" }, { parola: "Colosseo", emoji: "🏛️", categoria: "cose" }, { parola: "vulcano", emoji: "🌋", categoria: "cose" }, { parola: "pesce", emoji: "🐟", categoria: "cose" }, { parola: "limone", emoji: "🍋", categoria: "cose" },
+        { parola: "Nord", emoji: "⬆️", categoria: "luoghi" }, { parola: "Centro", emoji: "⏺️", categoria: "luoghi" }, { parola: "Sud", emoji: "⬇️", categoria: "luoghi" }, { parola: "mare", emoji: "🌊", categoria: "luoghi" },
+        { parola: "grande", emoji: "🐘", categoria: "descrizioni" }, { parola: "bello", emoji: "😍", categoria: "descrizioni" },
+        { parola: "sì", emoji: "👍", categoria: "sociali" }, { parola: "no", emoji: "👎", categoria: "sociali" }, { parola: "ancora", emoji: "🔁", categoria: "sociali" }, { parola: "basta", emoji: "✋", categoria: "sociali" }
+      ] }
   ]
 };
+/* ======================== FINE CONFIG ======================== */
 </script>
 <script src="motore-v1.js"></script>
-</body></html>
+</body>
+</html>
