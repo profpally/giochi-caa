@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>L'Italia: Nord, Centro, Sud</title></head>
+<body>
+<script>
+const CONFIG = {
+  id: "esempio-italia",
+  titolo: "L'Italia: Nord, Centro, Sud",
+  tipo: "storia",
+  protagonista: "Leo",
+  livello: 1,
+  riscaldamento: 2,
+  voce: true, velocitaVoce: 0.9, tipoVoce: "automatica",
+  scena: "italia",
+  introduzione: "{nome} guarda la cartina dell'Italia. Mettiamo ogni cosa al suo posto.",
+  fine: "La cartina è completa. Bravo {nome}!",
+  obiettivi: [
+    "Colloca un elemento nella zona indicata della cartina (Nord, Centro, Sud, mare).",
+    "Al livello 3, colloca l'elemento rispondendo alla domanda «dove?», senza indicazione verbale del posto.",
+    "Mantiene l'attenzione per 8 passi consecutivi con l'adulto accanto."
+  ],
+  passi: [
+    { oggetto: "Alpi", emoji: "🏔️", zona: "nord", frase: "Le Alpi sono montagne altissime, con la neve.", comando: "Metti le Alpi al Nord.", domanda: "Dove sono le Alpi?" },
+    { oggetto: "nave", emoji: "🚢", zona: "mare", frase: "Una grande nave porta le persone e le merci.", comando: "Metti la nave nel mare.", domanda: "Dove naviga la nave?" },
+    { oggetto: "Colosseo", emoji: "🏛️", zona: "centro", frase: "Il Colosseo è a Roma, la capitale d'Italia.", comando: "Metti il Colosseo al Centro.", domanda: "Dove si trova il Colosseo?" },
+    { oggetto: "vulcano", emoji: "🌋", zona: "sud", frase: "L'Etna è un vulcano: a volte esce il fuoco.", comando: "Metti il vulcano al Sud.", domanda: "Dove si trova il vulcano Etna?" },
+    { oggetto: "fiume", emoji: "🏞️", zona: "nord", frase: "Il Po è il fiume più lungo d'Italia.", comando: "Metti il fiume al Nord.", domanda: "Dove scorre il Po?" },
+    { oggetto: "pesce", emoji: "🐟", zona: "mare", frase: "Il pesce nuota nell'acqua salata.", comando: "Metti il pesce nel mare.", domanda: "Dove nuota il pesce?" },
+    { oggetto: "collina", emoji: "⛰️", zona: "centro", frase: "In Toscana ci sono tante colline verdi.", comando: "Metti la collina al Centro.", domanda: "Dove sono le colline della Toscana?" },
+    { oggetto: "trullo", emoji: "🏠", zona: "sud", frase: "Il trullo è una casa con il tetto a cono.", comando: "Metti il trullo al Sud.", domanda: "Dove si trovano i trulli?" },
+    { oggetto: "lago", emoji: "💧", zona: "nord", frase: "Il lago di Garda è il lago più grande d'Italia.", comando: "Metti il lago al Nord.", domanda: "Dove si trova il lago di Garda?" },
+    { oggetto: "limone", emoji: "🍋", zona: "sud", frase: "In Sicilia e in Campania crescono i limoni.", comando: "Metti il limone al Sud.", domanda: "Dove crescono i limoni?" }
+  ]
+};
+</script>
+<script src="motore-v1.js"></script>
+</body></html>
