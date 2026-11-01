@@ -286,8 +286,14 @@ C.passi.forEach(p => { addItem(p.oggetto, p.emoji, p.dici); (p.distrattori || []
 (C.voci || []).forEach(v => addItem(v.parola, v.emoji, v.dici)); (C.carte || []).forEach(v => addItem(v.parola, v.emoji, v.dici));
 const found = FOUND;   // parola -> [id ARASAAC]
 const arUrl = id => `https://static.arasaac.org/pictograms/${id}/${id}_500.png`;
+const AMBIGUE = {banco:'pupitre', banchi:'pupitre', penna:'bolígrafo', penne:'bolígrafo', gomma:'goma de borrar', gomme:'goma de borrar', pesca:'melocotón', pesche:'melocotón', riso:'arroz', cassa:'caja registradora', pila:'pila', mora:'mora', foglio:'hoja de papel', fogli:'hoja de papel', piano:'piano', collo:'cuello', canna:'caña de pescar', rete:'red', carta:'papel', pianta:'planta', mouse:'ratón de ordenador', cartella:'cartera escolar', temperino:'sacapuntas', diario:'agenda escolar', tavola:'mesa'};
 async function search(w){
-  const urls = [`https://api.arasaac.org/v1/pictograms/it/search/${encodeURIComponent(w)}`, `https://api.arasaac.org/api/pictograms/it/search/${encodeURIComponent(w)}`];
+  const alt = AMBIGUE[String(w).toLowerCase()] || ((ITEMS.get(w) || {}).cerca);
+  if (alt && !NET.down){ const r = await cerca(alt, 'es'); if (r.length) return r; }
+  return cerca(w, 'it');
+}
+async function cerca(w, lingua){
+  const urls = [`https://api.arasaac.org/v1/pictograms/${lingua}/search/${encodeURIComponent(w)}`, `https://api.arasaac.org/api/pictograms/${lingua}/search/${encodeURIComponent(w)}`];
   if (NET.down) return [];
   let errori = 0;
   for (const u of urls){
@@ -630,7 +636,7 @@ if (OPT.collect) return loadSymbols().then(() => { if (C.tipo === 'tabella') sta
 loadSymbols().then(restart);
 
 }
-window.GiochiCAA = {avvia, versione: '1.6'};
+window.GiochiCAA = {avvia, versione: '1.7'};
 if (!window.GIOCHI_CAA_NO_AUTO){
   let cfg = null; try { cfg = CONFIG; } catch(e) { cfg = window.CONFIG || null; }
   if (cfg) avvia(cfg);
