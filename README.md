@@ -13,7 +13,7 @@ Attività didattiche in CAA, in forma ludica, per alunni che comunicano con i si
 
 ## Licenze e attribuzioni
 - Motore, testi e disegni: © Sabrina Pallara, licenza [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.it). Uso didattico gratuito, non commerciale, citando l'autrice e condividendo le modifiche con la stessa licenza.
-- Pittogrammi (caricati dal sito ARASAAC quando l'attività si apre): Sergio Palao. Origine: ARASAAC (https://arasaac.org). Licenza: CC BY-NC-SA. Proprietà: Governo di Aragona (Spagna).
+- Pittogrammi: una libreria di ~700 parole è inclusa nella cartella `simboli/` (controllata a mano, `lessico.json`); per le altre parole l'attività li cerca sul sito ARASAAC. Autore: Sergio Palao. Origine: ARASAAC (https://arasaac.org). Licenza: CC BY-NC-SA. Proprietà: Governo di Aragona (Spagna).
 - Carattere Atkinson Hyperlegible: © Braille Institute of America, licenza SIL Open Font License 1.1 (`fonts/OFL.txt`).
 
 ## Privacy

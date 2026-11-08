@@ -307,10 +307,20 @@ async function cerca(w, lingua){
   if (errori === urls.length) NET.down = true;
   return [];
 }
-async function loadSymbols(){ await Promise.all([...ITEMS.keys()].map(async w => { if (!(w in found)) found[w] = await search(w); })); }
+/* libreria ARASAAC inclusa: parola -> simbolo controllato (ha la precedenza sulla ricerca online) */
+const LIB_BASE = (typeof window !== 'undefined' && window.GIOCHI_BASE) || 'https://profpally.github.io/giochi-caa/';
+const LIBIDS = new Set(); let LIB = {};
+const chiave = w => String(w || '').toLowerCase().trim();
+async function loadLib(){
+  try { const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 6000); const r = await fetch(LIB_BASE + 'lessico.json', {signal: ctl.signal}); clearTimeout(t); if (r.ok) LIB = await r.json(); } catch(e) {}
+}
+async function loadSymbols(){ await loadLib(); await Promise.all([...ITEMS.keys()].map(async w => { const id = LIB[chiave(w)]; if (id){ LIBIDS.add(id); found[w] = [id]; return; } if (w in found) return; if (false){} else found[w] = await search(w); })); }
 function src(w){
+  /* ordine: 1) libreria ARASAAC inclusa, 2) immagine caricata dall'insegnante, 3) ricerca online ARASAAC, 4) emoji */
+  const list = found[w] || [];
+  if (list.length && LIBIDS.has(list[0])) return `${LIB_BASE}simboli/${list[0]}.png`;
   if (S.img[w]) return S.img[w];
-  const list = found[w] || []; if (list.length) return arUrl(list[(S.pick[w] || 0) % list.length]);
+  if (list.length) { const id = list[(S.pick[w] || 0) % list.length]; return LIBIDS.has(id) ? `${LIB_BASE}simboli/${id}.png` : arUrl(id); }
   return null;
 }
 function cardHTML(w){ return C.carteMostrano === 'parola' ? `<span class="word">${D(w).toUpperCase()}</span>` : C.carteMostrano === 'entrambi' ? `<div class="both">${symHTML(w)}<b>${D(w).toUpperCase()}</b></div>` : symHTML(w); }
