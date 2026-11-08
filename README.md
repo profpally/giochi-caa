@@ -8,6 +8,7 @@ Attività didattiche in CAA, in forma ludica, per alunni che comunicano con i si
 - `motore-v1.js` – il motore. Le attività lo caricano da `https://profpally.github.io/giochi-caa/motore-v1.js`. **Non modificarlo:** per le nuove versioni si crea un file nuovo (`motore-v2.js`), così le attività già create non cambiano.
 - `esempio-italia.html` – set di esempio sull'Italia (cartina, Nord-Centro-Sud, tombola, tabella parlante).
 - `esempio-discipline.html` – set di esempio per più discipline (metti in ordine, conta e metti, tombola in inglese, tabella in spagnolo).
+- `creatore.html` – crea un set di giochi scegliendo le parole dalla libreria di simboli, senza Gemini.
 - `lettore.html` – per aprire un'attività incollando il suo blocco CONFIG.
 - `fonts/` – carattere Atkinson Hyperlegible, ospitato qui per non collegarsi a servizi esterni.
 

@@ -139,9 +139,52 @@ function menu(B){
     b.addEventListener('click', () => avvia(a, {back: () => menu(B), onDone: () => done.add(i)}));
     grid.appendChild(b);
   });
-  const raccogli = async () => { const out = []; for (const a of subs){ const h = document.createElement('div'); h.style.cssText = 'position:absolute;left:-20000px;top:0;width:1000px'; document.body.appendChild(h); try { out.push(await avvia(a, {collect: true, host: h})); } catch(e) { console.warn(e); } h.remove(); } return out; };
+  const raccogli = async () => { const out = []; ROTTE.length = 0; for (const a of subs){ const h = document.createElement('div'); h.style.cssText = 'position:absolute;left:-20000px;top:0;width:1000px'; document.body.appendChild(h); try { out.push(await avvia(a, {collect: true, host: h})); } catch(e) { console.warn(e); ROTTE.push({titolo: a.titolo || '', checks: validaAttivita(a).concat(['L\u2019attività non si può costruire: correggi i punti indicati.'])}); } h.remove(); } return out; };
   ROOT.querySelector('#mprint').addEventListener('click', async () => { const list = await raccogli(); stampa(B.titolo || 'Set di attività', list, B.obiettivi || []); });
-  raccogli().then(list => { const box = ROOT.querySelector('#mchecks'); if (!box) return; const righe = []; list.forEach((a, i) => a.checks.forEach(c => righe.push((i + 1) + '. ' + a.titolo + ' – ' + c))); if (subs.length < 2) righe.unshift('Il set ha una sola attività: ne servono almeno 2.'); if (righe.length){ box.innerHTML = '<h3>Da controllare prima di usare il set (solo per l\'insegnante)</h3><ul class="script">' + righe.map(r => '<li>' + esc(r) + '</li>').join('') + '</ul><p class="note">Copia questi punti e chiedi a Gemini di correggerli.</p>'; box.hidden = false; } });
+  raccogli().then(list => { const box = ROOT.querySelector('#mchecks'); if (!box) return; const righe = []; list.forEach((a, i) => a.checks.forEach(c => righe.push((i + 1) + '. ' + a.titolo + ' – ' + c))); ROTTE.forEach(a => a.checks.forEach(c => righe.push((a.titolo || 'Attività') + ' – ' + c))); validaSet(B).reverse().forEach(r => righe.unshift(r)); if (righe.length){ box.innerHTML = '<h3>Da controllare prima di usare il set (solo per l\'insegnante)</h3><ul class="script">' + righe.map(r => '<li>' + esc(r) + '</li>').join('') + '</ul><p class="note">Copia questi punti e chiedi a Gemini di correggerli.</p>'; box.hidden = false; } });
+}
+
+
+/* ---- controllo del CONFIG: messaggi chiari per l'insegnante ---- */
+const TIPI_OK = ['storia','smista','sequenza','tabellone','tabella','mimo','arrivo','via'];
+function validaAttivita(C){
+  const out = [], t = C.tipo || 'storia';
+  if (!TIPI_OK.includes(t)) out.push(`Il tipo di attività «${esc(t)}» non esiste. Tipi possibili: storia, smista, sequenza, tabellone (tombola), tabella, mimo.`);
+  if (!C.titolo) out.push('Manca il titolo dell’attività.');
+  const ps = C.passi || [];
+  if (t === 'tabella'){
+    const v = C.voci || [];
+    if (!v.length) out.push('La tabella non ha parole (manca l’elenco «voci»).'); else if (v.length < 6) out.push(`La tabella ha solo ${v.length} parole: ne servono almeno 6.`);
+    if (v.some(x => !x || !(x.parola))) out.push('Nella tabella c’è una voce senza «parola».');
+    const d = v.map(x => x && x.parola).filter(Boolean).filter((w, i, a) => a.indexOf(w) !== i); if (d.length) out.push('Nella tabella ci sono parole ripetute: ' + [...new Set(d)].map(w => '«' + esc(w) + '»').join(', ') + '.');
+  } else if (t === 'mimo'){
+    if (!(C.carte || []).length) out.push('Il gioco del mimo non ha carte (manca l’elenco «carte»).');
+  } else {
+    if (!ps.length) out.push('L’attività non ha passi (manca l’elenco «passi»): resterà vuota.');
+    ps.forEach((p, i) => { if (!p || !p.oggetto) out.push(`Il passo ${i + 1} non ha l’«oggetto».`); else {
+      if (!p.comando && t !== 'sequenza') out.push(`«${esc(p.oggetto)}»: manca il «comando» (la frase che dice cosa fare).`);
+      if (!p.frase) out.push(`«${esc(p.oggetto)}»: manca la «frase».`); } });
+    if (t !== 'sequenza'){ const d = ps.map(p => p && p.oggetto).filter(Boolean).filter((w, i, a) => a.indexOf(w) !== i); if (d.length) out.push('Ci sono oggetti ripetuti: ' + [...new Set(d)].map(w => '«' + esc(w) + '»').join(', ') + '. Ogni oggetto deve comparire una volta sola.'); }
+    if (t === 'tabellone' && (C.caselle || []).length < 4) out.push('La tombola ha meno di 4 caselle.');
+  }
+  return out;
+}
+const ROTTE = [];
+function validaSet(B){
+  const out = [], n = (B.set || []).length;
+  if (n && n < 2) out.push('Il set ha una sola attività: ne servono almeno 2.');
+  if (n > 5) out.push(`Il set ha ${n} attività: per non stancare l’alunno ne bastano da 3 a 5.`);
+  if (!B.titolo) out.push('Manca il titolo del set.');
+  return out;
+}
+function vuota(C){ return !C || typeof C !== 'object' || !(C.set && C.set.length || (C.passi || []).length || (C.voci || []).length || (C.carte || []).length || (C.caselle || []).length); }
+function libId(LIB, w){
+  const k = String(w || '').toLowerCase().trim(); if (LIB[k]) return LIB[k];
+  /* plurale -> singolare (libri→libro, mele→mela, fiori→fiore) solo se la parola esatta non c'è */
+  if (k.length > 3){ const b = k.slice(0, -1), u = k.slice(-1);
+    if (u === 'i') return LIB[b + 'o'] || LIB[b + 'e'] || null;
+    if (u === 'e') return LIB[b + 'a'] || null; }
+  return null;
 }
 
 function avvia(CONFIG, OPT){
@@ -150,6 +193,7 @@ CONFIG = normalizza(CONFIG);
 /* tolleranza: Gemini a volte scrive "oggetto" invece di "parola" nelle voci/carte e la categoria "oggetti" invece di "cose" */
 (CONFIG.voci || []).forEach(v => { if (v && typeof v === 'object'){ if (!v.parola) v.parola = v.oggetto || v.dici || v.id || ''; if (v.categoria === 'oggetti') v.categoria = 'cose'; } });
 (CONFIG.carte || []).forEach(v => { if (v && typeof v === 'object' && !v.parola) v.parola = v.oggetto || v.dici || v.id || ''; });
+if (!OPT.collect && vuota(CONFIG)){ stile(); document.querySelectorAll('.gcaa-root').forEach(r => r.remove()); const R = document.createElement('div'); R.className = 'gcaa-root'; R.innerHTML = '<div class="mchecks" style="margin:24px"><h3>Questa attività è vuota</h3><ul class="script"><li>Nel blocco CONFIG non ci sono passi, voci, carte o attività da mostrare.</li><li>Se l\u2019hai creata con Gemini, apri una nuova chat, scrivi @giochi-caa e riparti; oppure usa il Creatore di giochi (creatore.html).</li></ul></div>'; document.body.insertBefore(R, document.body.firstChild); return; }
 if (CONFIG.set && !OPT.collect) return menu(CONFIG);
 const RUN = OPT.collect ? RUNS : ++RUNS;
 stile();
@@ -206,6 +250,7 @@ const D = w => ((ITEMS.get(w) || {}).dici) || w;
 const QTY = {};
 C.passi = C.passi || [];
 const CHECKS = [];
+validaAttivita(C).forEach(t => CHECKS.push(t));
 if (C.tipo === 'sequenza' || C._seq){
   if (!C._seq){
     const n0 = C.passi.length; if (n0 < 3 || n0 > 8) CHECKS.push(`La sequenza ha ${n0} passi: ne servono da 3 a 8.`);
@@ -292,7 +337,7 @@ const chiave = w => String(w || '').toLowerCase().trim();
 async function loadLib(){
   try { const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 6000); const r = await fetch(LIB_BASE + 'lessico.json', {signal: ctl.signal}); clearTimeout(t); if (r.ok) LIB = await r.json(); } catch(e) {}
 }
-async function loadSymbols(){ await loadLib(); await Promise.all([...ITEMS.keys()].map(async w => { const id = LIB[chiave(w)]; if (id){ LIBIDS.add(id); found[w] = [id]; return; } if (w in found) return; if (false){} else found[w] = await search(w); })); }
+async function loadSymbols(){ await loadLib(); await Promise.all([...ITEMS.keys()].map(async w => { const id = libId(LIB, w); if (id){ LIBIDS.add(id); found[w] = [id]; return; } if (w in found) return; if (false){} else found[w] = await search(w); }));; if (LG === 'it' && Object.keys(LIB).length){ const senza = [...ITEMS.keys()].filter(w => !/^\d+$/.test(w) && !LIBIDS.has((found[w] || [])[0])); if (senza.length) CHECKS.push('Simbolo non controllato (preso da ARASAAC o sostituito da un\u2019emoji): ' + senza.map(w => '«' + esc(w) + '»').join(', ') + '. Controlla che sia quello giusto, oppure usa una parola dell\u2019elenco delle parole disponibili.'); } }
 function src(w){
   /* ordine: 1) libreria ARASAAC inclusa, 2) immagine caricata dall'insegnante, 3) ricerca online ARASAAC, 4) emoji */
   const list = found[w] || [];
@@ -636,7 +681,7 @@ if (OPT.collect) return loadSymbols().then(() => { if (C.tipo === 'tabella') sta
 loadSymbols().then(restart);
 
 }
-window.GiochiCAA = {avvia, versione: '1.8'};
+window.GiochiCAA = {avvia, versione: '2.0'};
 if (!window.GIOCHI_CAA_NO_AUTO){
   let cfg = null; try { cfg = CONFIG; } catch(e) { cfg = window.CONFIG || null; }
   if (cfg) avvia(cfg);

@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Creatore di giochi in CAA</title>
+<style>
+@font-face{font-family:"Atkinson Hyperlegible";font-weight:400;src:url(fonts/atkinson-hyperlegible-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible";font-weight:700;src:url(fonts/atkinson-hyperlegible-latin-700-normal.woff2) format("woff2")}
+:root{--ink:#1b262d;--navy:#1f3a5f;--bg:#f3f6f6;--line:#cdd8db;--ok:#2e8b57;--warn:#b45309;--sel:#fff4cf}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Atkinson Hyperlegible",Verdana,sans-serif;line-height:1.5;font-size:18px}
+main{max-width:980px;margin:0 auto;padding:24px 16px 56px}
+h1{color:var(--navy);font-size:2rem;margin:0 0 6px}
+h2{color:var(--navy);font-size:1.3rem;margin:0 0 8px}
+p{margin:6px 0}
+.card{background:#fff;border:3px solid var(--ink);border-radius:16px;padding:16px 20px;margin:16px 0}
+label{font-weight:700;display:block;margin:10px 0 4px}
+input[type=text],input[type=number],select,textarea{font:inherit;padding:8px 10px;border:2px solid var(--ink);border-radius:10px;background:#fff;width:100%}
+button{font:inherit;font-weight:700;cursor:pointer;border:3px solid var(--ink);border-radius:12px;background:#fff;color:var(--ink);padding:8px 16px}
+button:hover{background:#eef3f4}
+button.pri{background:var(--ok);color:#fff;border-color:#1f6b42}
+button.pri:disabled{background:#9db7a8;border-color:#7d9a8b;cursor:not-allowed}
+button.sm{padding:3px 10px;font-size:.9rem;border-width:2px}
+:focus-visible{outline:4px solid #f59e0b;outline-offset:2px}
+.tipi{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.tipo{text-align:left;padding:12px 14px;border-radius:14px}
+.tipo[aria-pressed=true]{background:var(--sel);box-shadow:0 0 0 3px #f59e0b}
+.tipo b{display:block;font-size:1.05rem}.tipo span{font-weight:400;font-size:.9rem;color:#44525a}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.griglia{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px;max-height:340px;overflow:auto;padding:4px;border:2px solid var(--line);border-radius:12px;margin-top:8px}
+.sym{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 4px;font-size:.85rem;text-align:center;border-width:2px;border-radius:10px;font-weight:400}
+.sym img{width:64px;height:64px;object-fit:contain}
+.sym[aria-pressed=true]{background:var(--sel);border-color:#f59e0b}
+.scelte{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.chip{display:inline-flex;align-items:center;gap:6px;background:#fff;border:2px solid var(--ink);border-radius:999px;padding:2px 6px 2px 12px}
+.chip img{width:28px;height:28px}
+table{border-collapse:collapse;width:100%;margin-top:8px}
+th,td{border:2px solid var(--line);padding:6px;text-align:left;vertical-align:top;font-size:.95rem}
+td input[type=text],td select{padding:4px 6px;font-size:.95rem}
+td img{width:44px;height:44px;vertical-align:middle}
+.msg{border-radius:12px;padding:8px 12px;margin:8px 0}
+.msg.err{background:#fde8e8;border:2px solid #b42318}
+.msg.ok{background:#e6f4ea;border:2px solid #2e8b57}
+.msg.avv{background:#fff4e5;border:2px solid var(--warn)}
+.set li{margin:6px 0}
+.small{font-size:.9rem;color:#44525a}
+.nascosto{display:none}
+.footer{font-size:.85rem;color:#55636b;margin-top:24px}
+</style></head>
+<body><main>
+<h1>Creatore di giochi in CAA</h1>
+<p>Scegli il gioco e le parole dalla <b>libreria di simboli ARASAAC</b>, e ottieni un set di attività pronto da usare con l'alunno/a. <b>Non serve Gemini e non serve caricare niente.</b></p>
+
+<section class="card" aria-labelledby="h1">
+  <h2 id="h1">1. Che gioco vuoi fare?</h2>
+  <div class="tipi" id="tipi"></div>
+</section>
+
+<section class="card" aria-labelledby="h2">
+  <h2 id="h2">2. Titolo</h2>
+  <div class="row">
+    <div><label for="titolo">Titolo dell'attività</label><input type="text" id="titolo" placeholder="es. Lo zaino di scuola"></div>
+    <div id="boxCont" class="nascosto"><label for="nCont">Quanti contenitori?</label><select id="nCont"><option>2</option><option>3</option></select></div>
+  </div>
+</section>
+
+<section class="card" aria-labelledby="h3">
+  <h2 id="h3">3. Scegli le parole</h2>
+  <p class="small" id="istr"></p>
+  <label for="cerca">Cerca una parola della libreria</label>
+  <input type="text" id="cerca" placeholder="Scrivi: zaino, mare, mela…" autocomplete="off">
+  <div class="griglia" id="griglia" aria-label="Parole disponibili"></div>
+  <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:end">
+    <div style="flex:1;min-width:200px"><label for="libera">Una parola che non c'è?</label><input type="text" id="libera" placeholder="Scrivila qui (singolare)"></div>
+    <button id="aggLibera">Aggiungi</button>
+  </div>
+  <p class="small">Le parole fuori libreria cercano il simbolo su ARASAAC, che può sbagliare: nel gioco, dal pannello «Insegnante», puoi scegliere un altro simbolo o caricare una tua immagine.</p>
+  <h3 style="margin-bottom:0">Parole scelte (<span id="nSel">0</span>)</h3>
+  <div class="scelte" id="scelte"></div>
+</section>
+
+<section class="card" aria-labelledby="h4">
+  <h2 id="h4">4. Controlla i testi</h2>
+  <p class="small">Le frasi sono scritte da sole: correggile se serve (per esempio gli articoli). Le legge la voce del gioco.</p>
+  <div id="tabTesti"></div>
+  <div id="controlli"></div>
+  <div style="margin-top:12px"><button class="pri" id="aggiungi" disabled>Aggiungi questa attività al set</button></div>
+</section>
+
+<section class="card" aria-labelledby="h5">
+  <h2 id="h5">5. Il tuo set (da 1 a 5 attività)</h2>
+  <ol class="set" id="set"></ol>
+  <p id="setVuoto" class="small">Per ora non c'è nessuna attività.</p>
+  <div class="row">
+    <div><label for="titoloSet">Titolo del set</label><input type="text" id="titoloSet" placeholder="es. Andiamo a scuola"></div>
+    <div><label for="nome">Nome dell'alunno/a (opzionale)</label><input type="text" id="nome" placeholder="es. Leo"></div>
+    <div><label for="livello">Livello di partenza</label>
+      <select id="livello"><option value="1">1 – guidato, una sola scelta</option><option value="2">2 – due scelte</option><option value="3">3 – senza aiuto del posto</option><option value="4">4 – tre scelte</option><option value="5">5 – sfida, quattro scelte</option></select></div>
+  </div>
+  <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+    <button class="pri" id="anteprima" disabled>▶ Prova il set</button>
+    <button id="scarica" disabled>⬇ Scarica la pagina</button>
+    <button id="copia" disabled>Copia il CONFIG</button>
+  </div>
+  <div id="esito" role="status"></div>
+  <p class="small">«Scarica la pagina» salva un file .html che si apre con Chrome o Edge (serve internet). «Copia il CONFIG» serve per incollarlo nel <a href="lettore.html">Lettore</a>.</p>
+</section>
+
+<p class="footer">Pittogrammi: Sergio Palao. Origine: ARASAAC (https://arasaac.org). Licenza: CC BY-NC-SA. Proprietà: Governo di Aragona (Spagna). Creatore, motore e testi: Sabrina Pallara, licenza CC BY-NC-SA 4.0. Strumento sperimentale e gratuito, non è un dispositivo professionale né sostituisce il parere di logopedisti e terapisti.</p>
+</main>
+
+<script>
+'use strict';
+const MOTORE = new URLSearchParams(location.search).get('motore') || 'https://profpally.github.io/giochi-caa/motore-v1.js?v=2.0';
+const BASE_ONLINE = 'https://profpally.github.io/giochi-caa/';
+const $ = s => document.querySelector(s);
+const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let LIB = {}, BASE = '';
+
+const TIPI = {
+  tabella: {nome: 'Tabella parlante', desc: 'Una tabella di simboli: l’alunno li tocca e la voce dice la frase.', min: 6, max: 24, istr: 'Scegli da 6 a 24 parole (persone, azioni, cose, luoghi…).'},
+  tabellone: {nome: 'Tombola', desc: 'Esce un simbolo e l’alunno lo mette sulla cartella.', min: 6, max: 12, istr: 'Scegli da 6 a 12 parole: sono le caselle della cartella.'},
+  smista: {nome: 'Metti nel posto giusto', desc: 'Ogni cosa va nel suo contenitore (zaino, cesto, casa…).', min: 8, max: 16, istr: 'Prima scegli i contenitori (2 o 3 parole), poi almeno 8 oggetti: per ognuno indicherai dove va.'},
+  sequenza: {nome: 'Metti in ordine', desc: 'I simboli vanno messi nell’ordine giusto (prima, poi, alla fine).', min: 3, max: 8, istr: 'Scegli da 3 a 8 parole, nell’ordine in cui accadono (puoi spostarle con le frecce).'}
+};
+const CAT = ['persone','azioni','cose','luoghi','descrizioni','sociali','tempo','domande'];
+const PERSONE = ['io','tu','noi','voi','mamma','papà','bambino','bambina','maestra','maestro','amico','amica'];
+const SOCIALI = ['sì','no','basta','ancora','grazie','ciao','scusa','per favore','aiuto','prego'];
+const OBIETTIVI = {
+  tabella: ['Usa la tabella per comporre una frase di 2-3 simboli.'],
+  tabellone: ['Riconosce il simbolo uscito e lo colloca sulla cartella.'],
+  smista: ['Colloca ogni elemento nel contenitore corretto.'],
+  sequenza: ['Mette in ordine i simboli di una sequenza di 3-8 passi.']
+};
+
+/* ---- articoli (indicativi: l'insegnante può correggere) ---- */
+function art(w){
+  const s = w.toLowerCase().trim(), v = /^[aeiouàèéìòù]/.test(s);
+  if (/ [a-zàèéìòù]+$/.test(s) && /^(il|lo|la|l'|i|gli|le) /.test(s)) return s;
+  if (v) return "l'" + s;
+  const fem = /[aàù]$/.test(s) && !/^(papà|problema|cinema|pigiama|panda|programma|pianeta|clima|tema|sistema)$/.test(s) || /(zione|sione|tà|tù|ie)$/.test(s);
+  if (fem) return 'la ' + s;
+  if (/^(z|gn|ps|x|y|s[bcdfghlmnpqrstvz])/.test(s)) return 'lo ' + s;
+  return 'il ' + s;
+}
+const PREP = {'il ':'nel ', 'lo ':'nello ', 'la ':'nella ', "l'":"nell'"};
+const LUOGHI = {casa:'in casa', scuola:'a scuola', mare:'al mare', montagna:'in montagna', 'città':'in città', campagna:'in campagna', parco:'al parco', supermercato:'al supermercato', negozio:'in negozio', ospedale:'in ospedale', chiesa:'in chiesa', cucina:'in cucina', bagno:'in bagno', giardino:'in giardino', camera:'in camera', aula:'in aula', palestra:'in palestra', biblioteca:'in biblioteca', piscina:'in piscina', spiaggia:'in spiaggia', bosco:'nel bosco', lago:'al lago', fiume:'nel fiume', zoo:'allo zoo', cinema:'al cinema', teatro:'a teatro', stazione:'in stazione', aeroporto:'in aeroporto', strada:'in strada'};
+function inArt(w){ if (LUOGHI[w.toLowerCase()]) return LUOGHI[w.toLowerCase()]; const a = art(w); for (const k in PREP) if (a.startsWith(k)) return PREP[k] + a.slice(k.length); return 'in ' + a; }
+const maiusc = t => t.charAt(0).toUpperCase() + t.slice(1);
+function indovinaCat(w){ const s = w.toLowerCase(); if (PERSONE.includes(s)) return 'persone'; if (SOCIALI.includes(s)) return 'sociali'; if (/(are|ere|ire)$/.test(s)) return 'azioni'; return 'cose'; }
+const slug = t => (t || 'set').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'set';
+
+/* ---- stato ---- */
+let tipo = null, scelte = [];          // scelte: [{w, cont?, cat?, comando, frase, domanda}]
+let cont = [];                          // contenitori (smista): [{w, dove}]
+const SET = [];                         // attività complete (oggetti CONFIG)
+const simbolo = w => { const k = w.toLowerCase().trim(); const id = LIB[k] || ((k.length > 3 && /i$/.test(k)) ? (LIB[k.slice(0,-1)+'o'] || LIB[k.slice(0,-1)+'e']) : (k.length > 3 && /e$/.test(k)) ? LIB[k.slice(0,-1)+'a'] : null); return id ? BASE + 'simboli/' + id + '.png' : null; };
+const imgTag = w => { const s = simbolo(w); return s ? `<img src="${s}" alt="" width="64" height="64">` : '<span aria-hidden="true">⬜</span>'; };
+
+/* ---- passo 1: tipi ---- */
+function disegnaTipi(){
+  $('#tipi').innerHTML = Object.entries(TIPI).map(([k, t]) => `<button class="tipo" data-t="${k}" aria-pressed="${tipo === k}"><b>${t.nome}</b><span>${t.desc}</span></button>`).join('');
+  document.querySelectorAll('.tipo').forEach(b => b.addEventListener('click', () => { if (tipo !== b.dataset.t){ tipo = b.dataset.t; scelte = []; cont = []; } disegnaTipi(); aggiorna(); }));
+}
+
+/* ---- passo 3: libreria ---- */
+function disegnaGriglia(){
+  const q = $('#cerca').value.toLowerCase().trim();
+  let ws = Object.keys(LIB).sort((a, b) => a.localeCompare(b, 'it'));
+  if (q) ws = ws.filter(w => w.includes(q));
+  ws = ws.slice(0, q ? 120 : 160);
+  const gia = new Set(scelte.map(s => s.w.toLowerCase()).concat(cont.map(c => c.w.toLowerCase())));
+  $('#griglia').innerHTML = ws.length ? ws.map(w => `<button class="sym" data-w="${esc(w)}" aria-pressed="${gia.has(w)}" aria-label="${esc(w)}">${imgTag(w)}<span>${esc(w)}</span></button>`).join('') : '<p class="small" style="padding:8px">Nessuna parola trovata: puoi aggiungerla qui sotto.</p>';
+  $('#griglia').querySelectorAll('.sym').forEach(b => b.addEventListener('click', () => aggiungi(b.dataset.w)));
+}
+function aggiungi(w){
+  w = w.trim(); if (!w || !tipo) { if (!tipo) msg('Scegli prima il tipo di gioco (passo 1).', 'avv'); return; }
+  const k = w.toLowerCase();
+  const T = TIPI[tipo];
+  if (tipo === 'smista' && cont.length < +$('#nCont').value && !scelte.length){ if (!cont.some(c => c.w.toLowerCase() === k)) cont.push({w, dove: inArt(w)}); }
+  else {
+    if (scelte.some(s => s.w.toLowerCase() === k) || cont.some(c => c.w.toLowerCase() === k)){ rimuovi(k); return; }
+    if (scelte.length >= T.max){ msg(`Per questo gioco bastano ${T.max} parole.`, 'avv'); return; }
+    scelte.push({w, cat: indovinaCat(w), cont: ''});
+  }
+  msg(''); aggiorna();
+}
+function rimuovi(k){ cont = cont.filter(c => c.w.toLowerCase() !== k); scelte = scelte.filter(s => s.w.toLowerCase() !== k); aggiorna(); }
+function sposta(i, d){ const j = i + d; if (j < 0 || j >= scelte.length) return; [scelte[i], scelte[j]] = [scelte[j], scelte[i]]; aggiorna(); }
+
+function disegnaScelte(){
+  const ch = (w, k, extra) => `<span class="chip">${imgTag(w).replace(/width="64" height="64"/, '')}<span>${esc(w)}</span>${extra || ''}<button class="sm" data-rm="${esc(k)}" aria-label="Togli ${esc(w)}">✕</button></span>`;
+  let h = '';
+  if (tipo === 'smista') h += (cont.length ? '<b>Contenitori:</b> ' : '') + cont.map(c => ch(c.w, c.w.toLowerCase())).join(' ') + '<br>';
+  h += scelte.map((s, i) => ch(s.w, s.w.toLowerCase(), tipo === 'sequenza' ? ` <button class="sm" data-su="${i}" aria-label="Sposta prima">◀</button><button class="sm" data-giu="${i}" aria-label="Sposta dopo">▶</button>` : '')).join(' ');
+  $('#scelte').innerHTML = h; $('#nSel').textContent = scelte.length;
+  $('#scelte').querySelectorAll('[data-rm]').forEach(b => b.addEventListener('click', () => rimuovi(b.dataset.rm)));
+  $('#scelte').querySelectorAll('[data-su]').forEach(b => b.addEventListener('click', () => sposta(+b.dataset.su, -1)));
+  $('#scelte').querySelectorAll('[data-giu]').forEach(b => b.addEventListener('click', () => sposta(+b.dataset.giu, 1)));
+}
+
+/* ---- passo 4: testi ---- */
+function testiDefault(s, i, n){
+  const a = art(s.w);
+  if (tipo === 'smista'){ const c = cont.find(c => c.w === s.cont); return {frase: `Questo è ${a}.`, comando: `Metti ${a} ${c ? c.dove : 'nel posto giusto'}.`, domanda: `Dove metti ${a}?`}; }
+  if (tipo === 'tabellone') return {frase: `Esce ${a}.`, comando: `Metti ${a} sulla cartella.`, domanda: `Dov'è ${a} sulla cartella?`};
+  if (tipo === 'sequenza') return {frase: i === 0 ? `Prima: ${a}.` : i === n - 1 ? `Alla fine: ${a}.` : `Poi: ${a}.`, comando: `Metti ${a} al posto numero ${i + 1}.`, domanda: `Che cosa viene al posto ${i + 1}?`};
+  return {};
+}
+function disegnaTesti(){
+  const box = $('#tabTesti'); if (!tipo || !scelte.length){ box.innerHTML = '<p class="small">Scegli il gioco e le parole: qui compariranno i testi.</p>'; return; }
+  const n = scelte.length;
+  scelte.forEach((s, i) => { if (!s._mod) Object.assign(s, testiDefault(s, i, n)); });
+  if (tipo === 'tabella'){
+    box.innerHTML = '<table><thead><tr><th>Simbolo</th><th>Parola</th><th>Categoria (colore)</th></tr></thead><tbody>' + scelte.map((s, i) => `<tr><td>${imgTag(s.w)}</td><td>${esc(s.w)}</td><td><select data-cat="${i}" aria-label="Categoria di ${esc(s.w)}">${CAT.map(c => `<option${c === s.cat ? ' selected' : ''}>${c}</option>`).join('')}</select></td></tr>`).join('') + '</tbody></table>';
+    box.querySelectorAll('[data-cat]').forEach(e => e.addEventListener('change', () => { scelte[+e.dataset.cat].cat = e.value; controlla(); }));
+    return;
+  }
+  const colCont = tipo === 'smista';
+  box.innerHTML = '<table><thead><tr><th>Simbolo</th><th>Parola</th>' + (colCont ? '<th>Dove va</th>' : '') + '<th>Frase</th><th>Comando</th><th>Domanda</th></tr></thead><tbody>' + scelte.map((s, i) => `<tr><td>${imgTag(s.w)}</td><td>${esc(s.w)}</td>` + (colCont ? `<td><select data-dv="${i}" aria-label="Dove va ${esc(s.w)}"><option value="">scegli…</option>${cont.map(c => `<option value="${esc(c.w)}"${c.w === s.cont ? ' selected' : ''}>${esc(c.w)}</option>`).join('')}</select></td>` : '') + ['frase', 'comando', 'domanda'].map(k => `<td><input type="text" data-k="${k}" data-i="${i}" value="${esc(s[k] || '')}" aria-label="${k} di ${esc(s.w)}"></td>`).join('') + '</tr>').join('') + '</tbody></table>' +
+    (colCont ? '<p class="small">Per ogni contenitore puoi correggere come si dice («nello zaino»):</p><div class="row">' + cont.map((c, i) => `<div><label for="cd${i}">${esc(c.w)}</label><input type="text" id="cd${i}" data-cd="${i}" value="${esc(c.dove)}"></div>`).join('') + '</div>' : '');
+  box.querySelectorAll('input[data-k]').forEach(e => e.addEventListener('input', () => { const s = scelte[+e.dataset.i]; s[e.dataset.k] = e.value; s._mod = true; controlla(); }));
+  box.querySelectorAll('[data-dv]').forEach(e => e.addEventListener('change', () => { scelte[+e.dataset.dv].cont = e.value; scelte.forEach((s, i) => { if (!s._mod){ Object.assign(s, testiDefault(s, i, scelte.length)); ['frase','comando','domanda'].forEach(k => { const f = box.querySelector(`input[data-k="${k}"][data-i="${i}"]`); if (f) f.value = s[k] || ''; }); } }); controlla(); }));
+  box.querySelectorAll('[data-cd]').forEach(e => e.addEventListener('input', () => { cont[+e.dataset.cd].dove = e.value; controlla(); }));
+}
+
+/* ---- costruzione CONFIG di un'attività e controlli ---- */
+function costruisci(){
+  const titolo = $('#titolo').value.trim() || TIPI[tipo].nome;
+  const ob = OBIETTIVI[tipo];
+  if (tipo === 'tabella') return {titolo, tipo, voci: scelte.map(s => ({parola: s.w, emoji: '⬜', categoria: s.cat}))};
+  if (tipo === 'sequenza') return {titolo, tipo, introduzione: 'Guardiamo con ordine.', fine: 'Bravo {nome}! Hai messo tutto in ordine.', passi: scelte.map(s => ({oggetto: s.w, emoji: '⬜', frase: s.frase, comando: s.comando}))};
+  if (tipo === 'tabellone'){
+    const passi = scelte.map(s => ({oggetto: s.w, emoji: '⬜', zona: s.w, frase: s.frase, comando: s.comando, domanda: s.domanda}));
+    for (let i = passi.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [passi[i], passi[j]] = [passi[j], passi[i]]; }
+    return {titolo, tipo, carteMostrano: 'simbolo', paroleSulTabellone: false, introduzione: 'Giochiamo a tombola.', fine: 'Tombola! Bravo {nome}!', caselle: scelte.map(s => ({id: s.w, parola: s.w, emoji: '⬜'})), passi};
+  }
+  return {titolo, tipo: 'smista', introduzione: 'Mettiamo ogni cosa al suo posto.', fine: 'Tutto in ordine. Bravo {nome}!', scatole: cont.map(c => ({id: c.w, parola: c.w, emoji: '⬜'})), passi: scelte.map(s => ({oggetto: s.w, emoji: '⬜', zona: s.cont, frase: s.frase, comando: s.comando, domanda: s.domanda}))};
+}
+function problemi(){
+  const out = [], T = tipo && TIPI[tipo]; if (!T) return ['Scegli il tipo di gioco.'];
+  if (tipo === 'smista' && cont.length < +$('#nCont').value) out.push(`Scegli ${$('#nCont').value} contenitori (ne hai ${cont.length}).`);
+  if (scelte.length < T.min) out.push(`Servono almeno ${T.min} parole (ne hai ${scelte.length}).`);
+  if (tipo === 'smista'){
+    const senza = scelte.filter(s => !s.cont).map(s => s.w); if (senza.length) out.push('Indica dove va: ' + senza.join(', ') + '.');
+    else if (new Set(scelte.map(s => s.cont)).size < 2) out.push('Gli oggetti devono andare in almeno 2 contenitori diversi.');
+    cont.forEach(c => { const n = scelte.filter(s => s.cont === c.w).length; if (n && n < 2) out.push(`Nel contenitore «${c.w}» metti almeno 2 oggetti.`); });
+    scelte.forEach(s => { if (s.frase && cont.some(c => c.w.length > 2 && new RegExp('\\b' + c.w + '\\b', 'i').test(s.frase))) out.push(`La frase di «${s.w}» nomina già il contenitore: toglilo, altrimenti dà la risposta.`); });
+  }
+  if (tipo !== 'tabella') scelte.forEach(s => { if (!s.comando || !s.comando.trim()) out.push(`Manca il comando di «${s.w}».`); });
+  return out;
+}
+function avvisi(){ const f = scelte.concat(cont).map(s => s.w).filter(w => !simbolo(w)); return f.length ? 'Parole senza simbolo controllato: ' + [...new Set(f)].join(', ') + '. Nel gioco cercherò il simbolo su ARASAAC e potrai cambiarlo dal pannello Insegnante.' : ''; }
+function controlla(){
+  const p = problemi(), a = avvisi();
+  $('#controlli').innerHTML = (p.length ? '<div class="msg err"><b>Da sistemare:</b><ul>' + p.map(x => `<li>${esc(x)}</li>`).join('') + '</ul></div>' : '<div class="msg ok">Tutto a posto: puoi aggiungere l’attività al set.</div>') + (a ? `<div class="msg avv">${esc(a)}</div>` : '');
+  $('#aggiungi').disabled = !!p.length || SET.length >= 5;
+  if (SET.length >= 5) $('#controlli').insertAdjacentHTML('beforeend', '<div class="msg avv">Il set ha già 5 attività: sono il massimo.</div>');
+}
+function aggiorna(){ $('#istr').textContent = tipo ? TIPI[tipo].istr : 'Scegli prima il tipo di gioco (passo 1).'; $('#boxCont').classList.toggle('nascosto', tipo !== 'smista'); disegnaGriglia(); disegnaScelte(); disegnaTesti(); controlla(); }
+function msg(t, c){ $('#esito').innerHTML = t ? `<div class="msg ${c || 'ok'}">${esc(t)}</div>` : ''; }
+
+/* ---- set ---- */
+function disegnaSet(){
+  $('#set').innerHTML = SET.map((a, i) => `<li><b>${esc(a.titolo)}</b> <span class="small">(${esc(TIPI[a.tipo].nome)})</span> <button class="sm" data-su="${i}" aria-label="Sposta su">▲</button><button class="sm" data-giu="${i}" aria-label="Sposta giù">▼</button><button class="sm" data-del="${i}" aria-label="Togli">✕</button></li>`).join('');
+  $('#setVuoto').classList.toggle('nascosto', !!SET.length);
+  ['anteprima', 'scarica', 'copia'].forEach(id => $('#' + id).disabled = !SET.length);
+  $('#set').querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => { SET.splice(+b.dataset.del, 1); disegnaSet(); controlla(); }));
+  $('#set').querySelectorAll('[data-su]').forEach(b => b.addEventListener('click', () => { const i = +b.dataset.su; if (i > 0){ [SET[i-1], SET[i]] = [SET[i], SET[i-1]]; disegnaSet(); } }));
+  $('#set').querySelectorAll('[data-giu]').forEach(b => b.addEventListener('click', () => { const i = +b.dataset.giu; if (i < SET.length - 1){ [SET[i+1], SET[i]] = [SET[i], SET[i+1]]; disegnaSet(); } }));
+}
+$('#aggiungi').addEventListener('click', () => {
+  if (problemi().length) return;
+  SET.push(costruisci()); const nome = TIPI[tipo].nome;
+  tipo = null; scelte = []; cont = []; $('#titolo').value = ''; $('#cerca').value = ''; disegnaTipi(); aggiorna(); disegnaSet();
+  msg(`Attività aggiunta (${SET.length}). Puoi crearne un'altra oppure provare il set.`);
+  $('#h5').scrollIntoView({behavior: 'smooth'});
+});
+
+function configSet(){
+  const titolo = $('#titoloSet').value.trim() || (SET.length === 1 ? SET[0].titolo : 'Set di attività');
+  const ob = []; SET.forEach(a => (OBIETTIVI[a.tipo] || []).forEach(o => { if (!ob.includes(o)) ob.push(o); }));
+  const C = {id: slug(titolo), titolo, protagonista: $('#nome').value.trim() || 'Il bambino', livello: +$('#livello').value, riscaldamento: 2, voce: true, velocitaVoce: 0.9, tipoVoce: 'automatica', obiettivi: ob, set: JSON.parse(JSON.stringify(SET))};
+  return C;
+}
+function paginaHTML(){
+  const C = configSet();
+  return '<!DOCTYPE html>\n<html lang="it">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>' + esc(C.titolo) + '</title>\n</head>\n<body>\n<script>\n/* ======================= INIZIO CONFIG ======================= */\nconst CONFIG = ' + JSON.stringify(C, null, 2).replace(/<\//g, '<\\/') + ';\n/* ======================== FINE CONFIG ======================== */\n<\/script>\n<script src="' + MOTORE + '"><\/script>\n</body>\n</html>\n';
+}
+$('#anteprima').addEventListener('click', () => { const u = URL.createObjectURL(new Blob([paginaHTML()], {type: 'text/html'})); const w = window.open(u, '_blank'); if (!w) msg('Il browser ha bloccato la finestra: consenti i popup per questo sito e riprova.', 'avv'); });
+$('#scarica').addEventListener('click', () => { const C = configSet(); const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([paginaHTML()], {type: 'text/html'})); a.download = C.id + '.html'; document.body.appendChild(a); a.click(); a.remove(); msg('Pagina scaricata: aprila con Chrome o Edge.'); });
+$('#copia').addEventListener('click', async () => { const t = 'const CONFIG = ' + JSON.stringify(configSet(), null, 2) + ';'; try { await navigator.clipboard.writeText(t); msg('CONFIG copiato: incollalo nel Lettore.'); } catch(e) { prompt('Copia questo testo:', t); } });
+$('#aggLibera').addEventListener('click', () => { aggiungi($('#libera').value); $('#libera').value = ''; });
+$('#libera').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); $('#aggLibera').click(); } });
+$('#cerca').addEventListener('input', disegnaGriglia);
+$('#nCont').addEventListener('change', () => { cont = cont.slice(0, +$('#nCont').value); aggiorna(); });
+$('#titolo').addEventListener('input', () => {});
+
+/* ---- avvio ---- */
+async function carica(){
+  for (const b of ['', BASE_ONLINE]){
+    try { const r = await fetch(b + 'lessico.json'); if (r.ok){ LIB = await r.json(); BASE = b; break; } } catch(e) {}
+  }
+  if (!Object.keys(LIB).length) $('#griglia').innerHTML = '<p class="msg err">Non riesco a caricare la libreria dei simboli: controlla la connessione a internet e ricarica la pagina.</p>';
+  disegnaTipi(); aggiorna(); disegnaSet();
+}
+carica();
+</script>
+</body></html>
