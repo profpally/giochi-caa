@@ -11,7 +11,7 @@
 </style></head>
 <body>
 <div id="lettore">
-  <h1>Lettore delle attività CAA (/giochi-caa)</h1>
+  <h1>Lettore delle attività CAA (@giochi-caa)</h1>
   <p>Usalo se l'attività creata da Gemini non si apre. In Gemini copia la pagina dell'attività (o solo il blocco <b>const CONFIG = { … };</b>), incollala qui sotto e premi <b>Apri l'attività</b>.</p>
   <textarea id="incolla" placeholder="Incolla qui la pagina o il blocco CONFIG"></textarea>
   <button id="apri">▶ Apri l'attività</button>
@@ -169,6 +169,9 @@ function menu(B){
 function avvia(CONFIG, OPT){
 OPT = OPT || {};
 CONFIG = normalizza(CONFIG);
+/* tolleranza: Gemini a volte scrive "oggetto" invece di "parola" nelle voci/carte e la categoria "oggetti" invece di "cose" */
+(CONFIG.voci || []).forEach(v => { if (v && typeof v === 'object'){ if (!v.parola) v.parola = v.oggetto || v.dici || v.id || ''; if (v.categoria === 'oggetti') v.categoria = 'cose'; } });
+(CONFIG.carte || []).forEach(v => { if (v && typeof v === 'object' && !v.parola) v.parola = v.oggetto || v.dici || v.id || ''; });
 if (CONFIG.set && !OPT.collect) return menu(CONFIG);
 const RUN = OPT.collect ? RUNS : ++RUNS;
 stile();
@@ -659,10 +662,12 @@ if (!window.GIOCHI_CAA_NO_AUTO){
   try { ta.value = localStorage.getItem('giochi-caa-lettore') || ''; } catch(e) {}
   document.getElementById('apri').addEventListener('click', () => {
     er.textContent = '';
-    let t = ta.value, i = t.indexOf('const CONFIG');
-    if (i < 0) i = t.indexOf('CONFIG');
-    if (i < 0){ er.textContent = 'Non trovo il blocco «const CONFIG = { … };». Copia di nuovo la pagina da Gemini.'; return; }
-    t = t.slice(i); let fine = t.search(/<\/script>|FINE CONFIG/); if (fine > 0){ const c = t.lastIndexOf('/*', fine); if (t.slice(fine, fine + 11) === 'FINE CONFIG' && c > 0) fine = c; t = t.slice(0, fine); }
+    let t = ta.value;
+    const m = t.match(/(?:const|let|var)?\s*CONFIG\s*=\s*\{/);
+    if (!m){ er.textContent = /fontawesome|tailwind|<style|function\s+\w+\s*\(/i.test(t)
+      ? 'Questa pagina non è stata creata con la skill giochi-caa (non ha il blocco CONFIG e non usa i simboli ARASAAC). Non usarla con l\u2019alunno/a: apri una nuova chat in Gemini, scrivi @giochi-caa e riparti.'
+      : 'Non trovo il blocco «const CONFIG = { … };». Copia di nuovo la pagina da Gemini, oppure apri una nuova chat e scrivi @giochi-caa.'; return; }
+    let i = m.index; t = t.slice(i); let fine = t.search(/<\/script>|FINE CONFIG/); if (fine > 0){ const c = t.lastIndexOf('/*', fine); if (t.slice(fine, fine + 11) === 'FINE CONFIG' && c > 0) fine = c; t = t.slice(0, fine); }
     t = t.replace(/^\s*(const|let|var)?\s*CONFIG\s*=/, 'return ');
     let cfg; try { cfg = new Function(t)(); } catch(e) { er.textContent = 'Il blocco CONFIG contiene un errore: ' + e.message; return; }
     if (!cfg || typeof cfg !== 'object'){ er.textContent = 'Il blocco CONFIG non è valido.'; return; }
