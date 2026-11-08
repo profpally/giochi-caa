@@ -147,6 +147,9 @@ function menu(B){
 function avvia(CONFIG, OPT){
 OPT = OPT || {};
 CONFIG = normalizza(CONFIG);
+/* tolleranza: Gemini a volte scrive "oggetto" invece di "parola" nelle voci/carte e la categoria "oggetti" invece di "cose" */
+(CONFIG.voci || []).forEach(v => { if (v && typeof v === 'object'){ if (!v.parola) v.parola = v.oggetto || v.dici || v.id || ''; if (v.categoria === 'oggetti') v.categoria = 'cose'; } });
+(CONFIG.carte || []).forEach(v => { if (v && typeof v === 'object' && !v.parola) v.parola = v.oggetto || v.dici || v.id || ''; });
 if (CONFIG.set && !OPT.collect) return menu(CONFIG);
 const RUN = OPT.collect ? RUNS : ++RUNS;
 stile();
