@@ -2,7 +2,7 @@
 
 Motore delle attività create con la skill **/giochi-caa** per Gemini, a cura di **Sabrina Pallara**.
 
-Attività didattiche in CAA, in forma ludica, per alunni che comunicano con i simboli: l'alunno/a mette ogni cartoncino al posto giusto (scene disegnate, cartina vera dell'Italia, contenitori, metti in ordine, conta e metti, tombola, tabella parlante, mimo; in italiano, inglese o spagnolo), con voce, simboli ARASAAC, livelli 1-4, pannello per l'insegnante e versione da stampare.
+Attività didattiche in CAA, in forma ludica, per alunni che comunicano con i simboli: l'alunno/a mette ogni cartoncino al posto giusto (scene disegnate, cartina vera dell'Italia, contenitori, metti in ordine, conta e metti, tombola, tabella parlante, mimo; in italiano, inglese o spagnolo), con voce, simboli ARASAAC, livelli 1-5, pannello per l'insegnante e versione da stampare.
 
 ## File
 - `motore-v1.js` – il motore. Le attività lo caricano da `https://profpally.github.io/giochi-caa/motore-v1.js`. **Non modificarlo:** per le nuove versioni si crea un file nuovo (`motore-v2.js`), così le attività già create non cambiano.
