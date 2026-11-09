@@ -196,9 +196,10 @@ function validaAttivita(C){
   } else {
     if (!ps.length) out.push('L’attività non ha passi (manca l’elenco «passi»): resterà vuota.');
     ps.forEach((p, i) => { if (!p || !p.oggetto) out.push(`Il passo ${i + 1} non ha l’«oggetto».`); else {
-      if (!p.comando && t !== 'sequenza') out.push(`«${esc(p.oggetto)}»: manca il «comando» (la frase che dice cosa fare).`);
       if (!p.frase) out.push(`«${esc(p.oggetto)}»: manca la «frase».`); } });
+    if (t !== 'sequenza'){ const senzaCmd = ps.filter(p => p && p.oggetto && !p.comando); if (senzaCmd.length) out.push(`In ${senzaCmd.length} passi manca il «comando» (la frase che dice cosa fare): al suo posto viene letta la domanda. Per un risultato migliore chiedi a Gemini di aggiungere il «comando» a ogni passo.`); }
     if (t !== 'sequenza'){ const d = ps.map(p => p && p.oggetto).filter(Boolean).filter((w, i, a) => a.indexOf(w) !== i); if (d.length) out.push('Ci sono oggetti ripetuti: ' + [...new Set(d)].map(w => '«' + esc(w) + '»').join(', ') + '. Ogni oggetto deve comparire una volta sola.'); }
+    if (t === 'smista' && (C.scatole || []).length < 2) out.push('Il gioco «smista» ha un solo contenitore: non c\u2019è niente da scegliere. Servono almeno 2 contenitori (con oggetti diversi in ciascuno).');
     if (t === 'smista') (C.scatole || []).forEach(b => { const p = ambienteDi(b); const dich = b.ambiente ? String(b.ambiente).toLowerCase().trim() : ''; const par = b.parola || b.id; if (dich && AMBIENTI[dich] && AMBIENTI[dich] !== p) out.push(`Il contenitore «${esc(par)}» aveva lo sfondo «${esc(dich)}», che non corrisponde: l\u2019ho tolto${p ? '' : ' (resta un riquadro semplice col simbolo)'}. Scegli un ambiente adatto o lascia solo il simbolo.`); else if (!p) out.push(`Per il contenitore «${esc(par)}» non esiste uno sfondo disegnato: si vede un riquadro col simbolo.`); });
     if (t === 'tabellone' && (C.caselle || []).length < 4) out.push('La tombola ha meno di 4 caselle.');
   }
@@ -329,13 +330,13 @@ if (!['tabella','mimo'].includes(C.tipo)){
   C.passi = C.passi.filter(p => ids.includes(p.zona));
   const conta = C.passi.some(p => +p.quantita > 1);
   if (!C._seq && C.passi.length < (conta ? 4 : 8)) CHECKS.push(`Ci sono solo ${C.passi.length} passi: ne servono almeno ${conta ? 4 : 8}.`);
-  C.passi.forEach(p => { const q = Math.max(1, Math.min(10, Math.round(+p.quantita || 1))); p.quantita = q; QTY[p.oggetto] = Math.max(QTY[p.oggetto] || 1, q); if (q > 1 && !p.domanda) p.domanda = p.comando; if (q > 1 && !/\d|uno|una|due|tre|quattro|cinque|sei|sette|otto|nove|dieci|one|two|three|four|five|six|seven|eight|nine|ten|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez/i.test(p.comando || '')) CHECKS.push(`«${p.oggetto}»: il comando non dice quanti oggetti mettere (${q}).`); });
+  C.passi.forEach(p => { if (p && !p.comando && p.domanda){ p.comando = p.domanda; p._fb = true; } const q = Math.max(1, Math.min(10, Math.round(+p.quantita || 1))); p.quantita = q; QTY[p.oggetto] = Math.max(QTY[p.oggetto] || 1, q); if (q > 1 && !p.domanda) p.domanda = p.comando; if (q > 1 && !/\d|uno|una|due|tre|quattro|cinque|sei|sette|otto|nove|dieci|one|two|three|four|five|six|seven|eight|nine|ten|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez/i.test(p.comando || '')) CHECKS.push(`«${p.oggetto}»: il comando non dice quanti oggetti mettere (${q}).`); });
   const usate = new Set(C.passi.map(p => p.zona)); if (ids.length > 1 && usate.size < 2) CHECKS.push('Tutti gli oggetti vanno nello stesso posto: servono almeno 2 posti diversi.');
   C.passi.forEach(p => {
     const z = zonesList().find(z => z.id === p.zona), nomi = [z.id, z.parola, z.dici].filter(Boolean).map(low);
     if (['storia','smista'].includes(C.tipo || 'storia') && nomi.some(n => n.length > 2 && new RegExp('\\b' + n + '\\b').test(low(p.frase)))) CHECKS.push(`«${p.oggetto}»: la frase nomina già il posto («${p.frase}»). Nei livelli 3 e 4 darebbe la risposta.`);
     if (!p.domanda) p.domanda = TX.dove;
-    if (LG === 'it' && ['storia','smista'].includes(C.tipo || 'storia') && !C._seq && p.comando){ const rad = low(p.oggetto).replace(/[aeiou]{1,2}$/, ''); let cmd = low(p.comando); nomi.forEach(n => { cmd = cmd.split(n).join(' '); }); if (nomi.includes(low(p.oggetto))) CHECKS.push(`«${p.oggetto}»: l'oggetto ha lo stesso nome del posto: scegli un oggetto da mettere lì.`); else if (rad.length > 2 && !cmd.includes(rad)) CHECKS.push(`«${p.oggetto}»: il comando («${p.comando}») parla di un altro oggetto.`); }
+    if (LG === 'it' && ['storia','smista'].includes(C.tipo || 'storia') && !C._seq && p.comando && !p._fb){ const rad = low(p.oggetto).replace(/[aeiou]{1,2}$/, ''); let cmd = low(p.comando); nomi.forEach(n => { cmd = cmd.split(n).join(' '); }); if (nomi.includes(low(p.oggetto))) CHECKS.push(`«${p.oggetto}»: l'oggetto ha lo stesso nome del posto: scegli un oggetto da mettere lì.`); else if (rad.length > 2 && !cmd.includes(rad)) CHECKS.push(`«${p.oggetto}»: il comando («${p.comando}») parla di un altro oggetto.`); }
     // distrattori: solo oggetti di un altro posto; se mancano li prende dagli altri passi
     const altri = C._seq ? [] : C.passi.filter(q => q.zona !== p.zona && q.oggetto !== p.oggetto).map(q => ({oggetto: q.oggetto, emoji: q.emoji, dici: q.dici}));
     p.distrattori = (p.distrattori || []).filter(d => d.oggetto !== p.oggetto && !C.passi.some(q => q.oggetto === d.oggetto && q.zona === p.zona));
@@ -370,8 +371,9 @@ async function cerca(w, lingua){
 const LIB_BASE = (typeof window !== 'undefined' && window.GIOCHI_BASE) || 'https://profpally.github.io/giochi-caa/';
 const LIBIDS = new Set(); let LIB = {};
 const chiave = w => String(w || '').toLowerCase().trim();
+const senzaAccenti = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 async function loadLib(){
-  try { const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 6000); const r = await fetch(LIB_BASE + 'lessico.json', {signal: ctl.signal}); clearTimeout(t); if (r.ok) LIB = await r.json(); } catch(e) {}
+  try { const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 6000); const r = await fetch(LIB_BASE + 'lessico.json', {signal: ctl.signal}); clearTimeout(t); if (r.ok){ LIB = await r.json(); Object.keys(LIB).forEach(k => { const n = senzaAccenti(k); if (!LIB[n]) LIB[n] = LIB[k]; }); } } catch(e) {}
 }
 async function loadSymbols(){ await loadLib(); await Promise.all([...ITEMS.keys()].map(async w => { const id = libId(LIB, w); if (id){ LIBIDS.add(id); found[w] = [id]; return; } if (w in found) return; if (false){} else found[w] = await search(w); }));; if (LG === 'it' && Object.keys(LIB).length){ const senza = [...ITEMS.keys()].filter(w => !/^\d+$/.test(w) && !LIBIDS.has((found[w] || [])[0])); if (senza.length) CHECKS.push('Simbolo non controllato (preso da ARASAAC o sostituito da un\u2019emoji): ' + senza.map(w => '«' + esc(w) + '»').join(', ') + '. Controlla che sia quello giusto, oppure usa una parola dell\u2019elenco delle parole disponibili.'); } }
 function src(w){
