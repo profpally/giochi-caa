@@ -700,6 +700,6 @@ loadSymbols().then(restart);
 window.GiochiCAA = {avvia, versione: '2.0'};
 if (!window.GIOCHI_CAA_NO_AUTO){
   let cfg = null; try { cfg = CONFIG; } catch(e) { cfg = window.CONFIG || null; }
-  if (cfg) avvia(cfg);
+  if (cfg){ const go = () => avvia(cfg); if (document.body) go(); else document.addEventListener('DOMContentLoaded', go); }
 }
 })();
